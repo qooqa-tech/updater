@@ -57,6 +57,7 @@ jobs:
         env:
           GITHUB_PACKAGE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.actor }}
+          ORG: ${{ github.repository_owner }}
           IMAGE_NAME: ${{ github.repository }}
           GITHUB_SHA: ${{ github.sha}}
           GITHUB_REF: ${{ github.ref}}
@@ -68,4 +69,4 @@ jobs:
           docker buildx build --push \
               --build-arg CI=github --build-arg GITHUB_SHA=${GITHUB_SHA} --build-arg GIT_BRANCH=${ref} \
               --platform linux/amd64,linux/arm/v7,linux/arm64 \
-              -t ${IMAGE_NAME}:${ref} .
+              -t {REGISTRY}/${ORG}/${IMAGE_NAME}:${ref} .
