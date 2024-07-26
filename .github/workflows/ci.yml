@@ -55,11 +55,13 @@ jobs:
       - name: build and deploy master image to ghcr.io and dockerhub
         if: ${{ github.ref == 'refs/heads/master' }}
         env:
-          GITHUB_PACKAGE_TOKEN: ${{ secrets.PKG_TOKEN }}
+          GITHUB_PACKAGE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.actor }}
           ORG: ${{ github.repository_owner }}
+          IMAGE_NAME: ${{ github.repository }}
           GITHUB_SHA: ${{ github.sha}}
           GITHUB_REF: ${{ github.ref}}
+          REGISTRY: ghcr.io          
         run: |
           ref="$(echo ${GITHUB_REF} | cut -d'/' -f3)"
           echo GITHUB_REF - $ref
@@ -67,22 +69,4 @@ jobs:
           docker buildx build --push \
               --build-arg CI=github --build-arg GITHUB_SHA=${GITHUB_SHA} --build-arg GIT_BRANCH=${ref} \
               --platform linux/amd64,linux/arm/v7,linux/arm64 \
-              -t ghcr.io/${ORG}/updater:${ref} -t ${ORG}/updater:${ref} .
-
-      - name: deploy tagged (latest) to ghcr.io and dockerhub
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        env:
-          GITHUB_PACKAGE_TOKEN: ${{ secrets.PKG_TOKEN }}
-          USERNAME: ${{ github.actor }}
-          ORG: ${{ github.repository_owner }}
-          GITHUB_SHA: ${{ github.sha}}
-          GITHUB_REF: ${{ github.ref}}
-        run: |
-          ref="$(echo ${GITHUB_REF} | cut -d'/' -f3)"
-          echo GITHUB_REF - $ref
-          echo ${GITHUB_PACKAGE_TOKEN} | docker login ghcr.io -u ${USERNAME} --password-stdin
-          docker buildx build --push \
-              --build-arg CI=github --build-arg GITHUB_SHA=${GITHUB_SHA} --build-arg GIT_BRANCH=${ref} \
-              --platform linux/amd64,linux/arm/v7,linux/arm64 \
-              -t ghcr.io/${ORG}/updater:${ref} -t ghcr.io/${ORG}/updater:latest \
-              -t ${ORG}/updater:${ref} -t ${ORG}/updater:latest .
+              -t ${ORG}/${IMAGE_NAME}:${ref} .
