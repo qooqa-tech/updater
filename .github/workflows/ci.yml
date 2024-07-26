@@ -57,7 +57,6 @@ jobs:
         env:
           GITHUB_PACKAGE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.actor }}
-          ORG: ${{ github.repository_owner }}
           IMAGE_NAME: ${{ github.repository }}
           GITHUB_SHA: ${{ github.sha}}
           GITHUB_REF: ${{ github.ref}}
@@ -65,8 +64,8 @@ jobs:
         run: |
           ref="$(echo ${GITHUB_REF} | cut -d'/' -f3)"
           echo GITHUB_REF - $ref
-          echo ${GITHUB_PACKAGE_TOKEN} | docker login ghcr.io -u ${USERNAME} --password-stdin
+          echo ${GITHUB_PACKAGE_TOKEN} | docker login ${REGISTRY} -u ${USERNAME} --password-stdin
           docker buildx build --push \
               --build-arg CI=github --build-arg GITHUB_SHA=${GITHUB_SHA} --build-arg GIT_BRANCH=${ref} \
               --platform linux/amd64,linux/arm/v7,linux/arm64 \
-              -t ${ORG}/${IMAGE_NAME}:${ref} .
+              -t ${IMAGE_NAME}:${ref} .
